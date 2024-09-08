@@ -39,6 +39,31 @@ public class EmployeeService {
     //     return empDTO;
     // }
 
+    public Employee createEmployeeDTO(EmployeeDto empDto)
+    {
+        Address a =new Address();
+        a.setCity(empDto.getCity());
+        
+        Address savedAdd=addressRepository.save(a);
+
+        Employee newEmp=new Employee();
+        newEmp.setFirstName(empDto.getName());
+        newEmp.setEmail(empDto.getEmail());
+        newEmp.setAddress(a); // Associate with Address
+
+        // Save Employee entity
+        Employee savedEmployee= employeeRepository.save(newEmp);
+
+        //make a employeeDTO to return:
+
+        EmployeeDto empDtoRes=new EmployeeDto();
+        empDto.setName(savedEmployee.getFirstName());
+        empDto.setEmail(savedEmployee.getEmail());
+        empDto.setCity(savedEmployee.getAddress().getCity());
+
+        return savedEmployee;
+
+    }
 
     // @Transactional(readOnly = true)
     public List<Employee> getAllEmployees() {

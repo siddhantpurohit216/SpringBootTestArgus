@@ -54,6 +54,7 @@
 package com.example.employeeManagement.Controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -92,6 +93,45 @@ public class EmployeeController {
         return employeeService.getAllEmployees();
     }
 
+    @PostMapping("/dto/{id}")
+    public ResponseEntity<EmployeeDto> createEmployeeDTO(@RequestBody EmployeeDto empDto) {
+
+        System.out.println("EmployeeDto Name: " + empDto.getName());
+        System.out.println("EmployeeDto email: " + empDto.getEmail());
+        System.out.println("EmployeeDto city: " + empDto.getCity());
+
+
+        // Manually map DTO to Address
+        Address address = new Address();
+        address.setCity(empDto.getCity());
+        // Set other address fields if present in the DTO
+
+        // Save Address entity
+        Address savedAddress = addressService.createAddress(address);
+
+        // Manually map DTO to Employee
+        Employee employee = new Employee();
+        employee.setFirstName(empDto.getName());
+        employee.setEmail(empDto.getEmail());
+        employee.setAddress(savedAddress);
+
+        // Save Employee entity
+        Employee savedEmployee = employeeService.createEmployee(employee);
+
+        // Manually map the saved Employee to EmployeeDto
+        EmployeeDto employeeDto = new EmployeeDto();
+        employeeDto.setName(savedEmployee.getFirstName());
+        employeeDto.setEmail(savedEmployee.getEmail());
+        employeeDto.setCity(savedEmployee.getAddress().getCity());
+        // Set other DTO fields as needed
+         // Print the values for debugging
+         System.out.println("EmployeeDto Name: " + employeeDto.getName());
+         System.out.println("EmployeeDto Email: " + employeeDto.getEmail());
+         System.out.println("EmployeeDto City: " + employeeDto.getCity());
+        
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(employeeDto);
+    }
     
 
     
