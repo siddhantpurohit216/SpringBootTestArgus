@@ -1,13 +1,20 @@
 package com.example.employeeManagement.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 
 @Entity
 public class Employee {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,24 +25,30 @@ public class Employee {
     private String department;
     private String password;
 
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Address address;
+
     // Constructors, Getters, and Setters
 
     public Employee() {}
 
-    public Employee(String firstName, String lastName, String email, String department,String password) {
+    public Employee(String firstName, String lastName, String email, String department, String password){
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.department = department;
-        this.password=password;
+        this.password = password;
     }
 
-    public Long getId() {
-        return id;
+    // Existing getters and setters
+
+    public Address getAddress() {
+        return address;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setAddress(Address address) {
+        this.address = address;
     }
 
     public String getFirstName() {
@@ -69,6 +82,7 @@ public class Employee {
     public void setDepartment(String department) {
         this.department = department;
     }
+
     public String getPassword() {
         return password;
     }
@@ -77,3 +91,5 @@ public class Employee {
         this.password = password;
     }
 }
+    
+

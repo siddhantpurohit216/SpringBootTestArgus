@@ -18,8 +18,8 @@ public class Address {
     private String state;
     private String zipCode;
 
-    @OneToOne(mappedBy = "address")
-    private Employee employee;
+    // @OneToOne
+    // private Employee employee;
 
     // Constructors, Getters, and Setters
 
@@ -72,11 +72,11 @@ public class Address {
         this.zipCode = zipCode;
     }
 
-    public Employee getEmployee() {
-        return employee;
-    }
+    // public Employee getEmployee() {
+    //     return employee;
+    // }
 
-    public void setEmployee(Employee employee) {
-        this.employee = employee;
-    }
+    // public void setEmployee(Employee employee) {
+    //     this.employee = employee;
+    // }
 }

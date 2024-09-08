@@ -2,10 +2,13 @@ package com.example.employeeManagement.Services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.employeeManagement.EmployeeDTO.EmployeeDto;
 import com.example.employeeManagement.Entities.Employee;
+import com.example.employeeManagement.Entities.Address;
 import com.example.employeeManagement.Repos.EmployeeRepository;
+import com.example.employeeManagement.Repos.AddressRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,36 +18,61 @@ import java.util.Optional;
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
-
+    private final AddressRepository addressRepository;
 
     @Autowired
-    public EmployeeService(EmployeeRepository employeeRepository) {
+    public EmployeeService(EmployeeRepository employeeRepository, AddressRepository addressRepository) {
         this.employeeRepository = employeeRepository;
+        this.addressRepository = addressRepository;
     }
 
-    public List<EmployeeDto> getAllEmployees() {
-        
-        List<Employee>emp= employeeRepository.findAll();
-        List<EmployeeDto> empDTO=new ArrayList();
+    // @Transactional(readOnly = true)
+    // public List<EmployeeDto> getAllEmployeesDTO() {
+    //     List<Employee> emp = employeeRepository.findAll();
+    //     List<EmployeeDto> empDTO = new ArrayList<>();
 
-        for(Employee e: emp)
-        {
-            EmployeeDto ans=new EmployeeDto(e.getFirstName()+ " "+ e.getLastName(), e.getEmail());
-            empDTO.add(ans);
-        }
+    //     for (Employee e : emp) {
+    //         EmployeeDto ans = new EmployeeDto(e.getFirstName() + " " + e.getLastName(), e.getEmail());
+    //         empDTO.add(ans);
+    //     }
 
-        return empDTO;
+    //     return empDTO;
+    // }
+
+
+    // @Transactional(readOnly = true)
+    public List<Employee> getAllEmployees() {
+        List<Employee> emp = employeeRepository.findAll();
+
+        return emp;
     }
 
+    @Transactional(readOnly = true)
+    public Employee fetchEmployee(Long employeeId) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new RuntimeException("Employee not found with id " + employeeId));
+        // Access the address to ensure it's loaded
+        // This is a no-op if it's already loaded
+        employee.getAddress(); 
+        return employee;
+    }
+    
+    // @Transactional(readOnly = true)
     public Optional<Employee> getEmployeeById(Long id) {
         return employeeRepository.findById(id);
     }
 
+    //createEmployeeWithAddress:
+    // @Transactional
     public Employee createEmployee(Employee employee) {
+        // Address address = employee.getAddress();
+        // if (address != null) {
+        //     addressRepository.save(address);
+        // }
         return employeeRepository.save(employee);
     }
 
-    
+    // @Transactional
     public Employee updateEmployee(Long id, Employee employeeDetails) {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Employee not found with id " + id));
@@ -55,13 +83,26 @@ public class EmployeeService {
         employee.setDepartment(employeeDetails.getDepartment());
         employee.setPassword(employeeDetails.getPassword());
 
+        Address address = employeeDetails.getAddress();
+        if (address != null) {
+            if (employee.getAddress() != null) {
+                address.setId(employee.getAddress().getId());
+            }
+            addressRepository.save(address);
+            employee.setAddress(address);
+        }
+
         return employeeRepository.save(employee);
     }
 
+    // @Transactional
     public void deleteEmployee(Long id) {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Employee not found with id " + id));
         
+        if (employee.getAddress() != null) {
+            addressRepository.delete(employee.getAddress());
+        }
         employeeRepository.delete(employee);
     }
 }

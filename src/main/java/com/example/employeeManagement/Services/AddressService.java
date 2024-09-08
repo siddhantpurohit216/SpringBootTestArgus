@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.employeeManagement.Entities.Address;
 import com.example.employeeManagement.Repos.AddressRepository;
 
+import jakarta.persistence.EntityNotFoundException;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -25,9 +27,9 @@ public class AddressService {
         return addressRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
-    public Optional<Address> getAddressById(Long id) {
-        return addressRepository.findById(id);
+    // @Transactional(readOnly = true)
+    public Address getAddressById(Long id) {
+        return addressRepository.findById(id).orElse(null);
     }
 
     @Transactional
@@ -38,7 +40,7 @@ public class AddressService {
     @Transactional
     public Address updateAddress(Long id, Address addressDetails) {
         Address address = addressRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Address not found with id " + id));
+                .orElseThrow(() -> new RuntimeException("Address not found with id " + id));
 
         address.setStreet(addressDetails.getStreet());
         address.setCity(addressDetails.getCity());
@@ -51,7 +53,7 @@ public class AddressService {
     @Transactional
     public void deleteAddress(Long id) {
         Address address = addressRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Address not found with id " + id));
+                .orElseThrow(() -> new RuntimeException("Address not found with id " + id));
 
         addressRepository.delete(address);
     }
