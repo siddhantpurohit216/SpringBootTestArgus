@@ -13,6 +13,8 @@ import com.example.employeeManagement.Repos.AddressRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 
 @Service
 public class EmployeeService {
@@ -26,18 +28,12 @@ public class EmployeeService {
         this.addressRepository = addressRepository;
     }
 
-    // @Transactional(readOnly = true)
-    // public List<EmployeeDto> getAllEmployeesDTO() {
-    //     List<Employee> emp = employeeRepository.findAll();
-    //     List<EmployeeDto> empDTO = new ArrayList<>();
 
-    //     for (Employee e : emp) {
-    //         EmployeeDto ans = new EmployeeDto(e.getFirstName() + " " + e.getLastName(), e.getEmail());
-    //         empDTO.add(ans);
-    //     }
 
-    //     return empDTO;
-    // }
+    public List<Employee> getAllEmployeesDTO() {
+        return employeeRepository.findAll();
+    }
+    
 
     public Employee createEmployeeDTO(EmployeeDto empDto)
     {

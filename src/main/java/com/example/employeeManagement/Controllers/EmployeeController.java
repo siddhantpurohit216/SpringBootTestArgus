@@ -1,6 +1,5 @@
 // package com.example.employeeManagement.Controllers;
 
-
 // import org.springframework.beans.factory.annotation.Autowired;
 // import org.springframework.http.ResponseEntity;
 // import org.springframework.web.bind.annotation.*;
@@ -62,31 +61,46 @@ import com.example.employeeManagement.EmployeeDTO.EmployeeDto;
 import com.example.employeeManagement.Entities.Employee;
 import com.example.employeeManagement.Entities.Address;
 import com.example.employeeManagement.Services.EmployeeService;
+
+import jakarta.transaction.Transactional;
+
 import com.example.employeeManagement.Services.AddressService;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/employees")
 public class EmployeeController {
 
-    //keeping the fileds as final to promote immutability through constructor injection
+    // keeping the fileds as final to promote immutability through constructor
+    // injection
     private final EmployeeService employeeService;
     private final AddressService addressService;
 
-    //constructor injection to promote immutability
+    // constructor injection to promote immutability
     @Autowired
     public EmployeeController(EmployeeService employeeService, AddressService addressService) {
         this.employeeService = employeeService;
         this.addressService = addressService;
     }
 
-    
-    // @GetMapping("/dto")
-    // public List<EmployeeDto> getAllEmployeesDTO() {
-    //     return employeeService.getAllEmployeesDTO();
-    // }
+    @GetMapping("/dto")
+    public ResponseEntity<List<EmployeeDto>> getAllEmployeesDTO() {
+        List<Employee> employees = employeeService.getAllEmployeesDTO();
+//     //hibernate runs another query to fetch the address entity
+    //     // System.out.println(employees.get(0).getAddress().getCity());
+        List<EmployeeDto> employeeDtos = employees.stream().map(employee -> {
+            EmployeeDto dto = new EmployeeDto();
+            dto.setName(employee.getFirstName());
+            dto.setEmail(employee.getEmail());
+            //hibernate runs another query to fetch the address entity
+            dto.setCity(employee.getAddress().getCity());
+            return dto;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(employeeDtos);
+    }
 
     @GetMapping
     public List<Employee> getAllEmployees() {
@@ -95,11 +109,6 @@ public class EmployeeController {
 
     @PostMapping("/dto/{id}")
     public ResponseEntity<EmployeeDto> createEmployeeDTO(@RequestBody EmployeeDto empDto) {
-
-        System.out.println("EmployeeDto Name: " + empDto.getName());
-        System.out.println("EmployeeDto email: " + empDto.getEmail());
-        System.out.println("EmployeeDto city: " + empDto.getCity());
-
 
         // Manually map DTO to Address
         Address address = new Address();
@@ -123,22 +132,15 @@ public class EmployeeController {
         employeeDto.setName(savedEmployee.getFirstName());
         employeeDto.setEmail(savedEmployee.getEmail());
         employeeDto.setCity(savedEmployee.getAddress().getCity());
-        // Set other DTO fields as needed
-         // Print the values for debugging
-         System.out.println("EmployeeDto Name: " + employeeDto.getName());
-         System.out.println("EmployeeDto Email: " + employeeDto.getEmail());
-         System.out.println("EmployeeDto City: " + employeeDto.getCity());
-        
 
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeDto);
     }
-    
 
-    
     // @GetMapping("/{id}")
     // public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
-    //     Optional<Employee> employee = employeeService.getEmployeeById(id);
-    //     return employee.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    // Optional<Employee> employee = employeeService.getEmployeeById(id);
+    // return employee.map(ResponseEntity::ok).orElseGet(() ->
+    // ResponseEntity.notFound().build());
     // }
 
     @GetMapping("/{id}")
@@ -164,12 +166,12 @@ public class EmployeeController {
 
     // @DeleteMapping("/{id}")
     // public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
-    //     employeeService.deleteEmployee(id);
-    //     return ResponseEntity.noContent().build();
+    // employeeService.deleteEmployee(id);
+    // return ResponseEntity.noContent().build();
     // }
 
     // Address related endpoints
-
+    @Transactional
     @GetMapping("/{employeeId}/address")
     public ResponseEntity<Address> getEmployeeAddress(@PathVariable Long employeeId) {
         Optional<Employee> employee = employeeService.getEmployeeById(employeeId);

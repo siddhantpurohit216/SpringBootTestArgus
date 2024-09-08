@@ -43,4 +43,10 @@ public class EmployeeDto {
     public void setCity(String city) {
         this.city = city;
     }
+
+
+    // @Override
+    // public String toString() {
+    //     return "EmployeeDto [name=" + name + ", email=" + email + ", city=" + city + "]";
+    // }
 }
